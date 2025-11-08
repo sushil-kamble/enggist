@@ -1,65 +1,97 @@
-import Image from "next/image";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="container mx-auto px-4 py-20 md:px-6 md:py-32">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="font-display text-5xl font-bold text-primary md:text-6xl lg:text-7xl">
+              Welcome to Enggist
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+              Your go-to platform for engineering insights, stories, and knowledge.
+              Join our community of passionate engineers building the future.
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <Link
+                href="/get-started"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-primary-foreground hover:bg-accent transition-colors"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/blog"
+                className="inline-flex items-center justify-center rounded-lg border-2 border-primary px-8 py-3 text-base font-semibold text-primary hover:bg-muted transition-colors"
+              >
+                Read Blog
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="border-t border-secondary bg-card py-20 md:py-32">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-center font-display text-3xl font-bold text-primary md:text-4xl">
+              Why Choose Enggist?
+            </h2>
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
+              {[
+                {
+                  title: "Expert Content",
+                  description: "Access high-quality engineering articles written by industry experts.",
+                },
+                {
+                  title: "Community Driven",
+                  description: "Connect with fellow engineers and share your knowledge.",
+                },
+                {
+                  title: "Always Learning",
+                  description: "Stay updated with the latest trends and technologies.",
+                },
+              ].map((feature, index) => (
+                <div
+                  key={index}
+                  className="rounded-lg border border-secondary bg-background p-6 transition-shadow hover:shadow-lg"
+                >
+                  <h3 className="text-xl font-semibold text-primary">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-3 text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="container mx-auto px-4 py-20 md:px-6 md:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold text-primary md:text-4xl">
+              Ready to Get Started?
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Join thousands of engineers who are already part of our community.
+            </p>
+            <Link
+              href="/signup"
+              className="mt-8 inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-primary-foreground hover:bg-accent transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              Sign Up Now
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
