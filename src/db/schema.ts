@@ -25,6 +25,7 @@ export const posts = pgTable('posts', {
   publishedAt: timestamp('published_at', { withTimezone: true }),
   author: text('author'),
   excerpt: text('excerpt'),
+  content: text('content'),
   contentHash: text('content_hash').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   // search_tsv exists in DB; managed via SQL migration + trigger

@@ -1,0 +1,18 @@
+{
+  "name": "enggist-ingest-cron",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "deploy:summarize": "wrangler deploy --config wrangler.summarize.toml",
+    "deploy:all": "pnpm run deploy && pnpm run deploy:summarize",
+    "dev": "wrangler dev",
+    "dev:summarize": "wrangler dev --config wrangler.summarize.toml",
+    "test": "wrangler dev --test-scheduled",
+    "test:summarize": "wrangler dev --test-scheduled --config wrangler.summarize.toml"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "wrangler": "^3.94.0"
+  }
+}

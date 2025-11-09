@@ -1,0 +1,6 @@
+# Local development secrets
+# Copy this to .dev.vars and fill in your values
+# .dev.vars is gitignored and used by `wrangler dev`
+
+APP_URL=http://localhost:3000
+INGEST_SECRET=your-local-secret-here

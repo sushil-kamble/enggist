@@ -8,8 +8,12 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Create postgres connection
-const client = postgres(process.env.DATABASE_URL);
+// Create postgres connection with pooled config (PgBouncer compatible)
+// Use max: 1 and prepare: false for pooled connections
+const client = postgres(process.env.DATABASE_URL, {
+  max: 1,
+  prepare: false,
+});
 
 // Create drizzle instance
 export const db = drizzle(client, { schema });
