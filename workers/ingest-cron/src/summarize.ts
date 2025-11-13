@@ -55,7 +55,7 @@ export default {
           'Content-Type': 'application/json',
         },
         // GUARDRAIL 3: Timeout to prevent hanging requests
-        signal: AbortSignal.timeout(120000), // 2 minute timeout
+        signal: AbortSignal.timeout(600000), // 10 minute timeout
       });
 
       if (!response.ok) {
@@ -91,7 +91,7 @@ export default {
     } catch (error: any) {
       // GUARDRAIL 6: Catch and log errors, but don't retry
       if (error.name === 'TimeoutError') {
-        console.error(`[${timestamp}] ❌ Request timeout after 2 minutes`);
+        console.error(`[${timestamp}] ❌ Request timeout after 10 minutes`);
       } else {
         console.error(`[${timestamp}] ❌ Summarization error:`, error.message);
       }
