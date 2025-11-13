@@ -6,10 +6,68 @@ import { db } from "@/db";
 import { sources } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  const source = await db
+    .select()
+    .from(sources)
+    .where(eq(sources.id, id))
+    .limit(1);
+
+  if (source.length === 0) {
+    return {
+      title: "Company Not Found",
+      description: "The requested company could not be found.",
+    };
+  }
+
+  const company = source[0];
+  const title = `${company.name} Engineering Blog Summaries`;
+  const description = `Read AI-powered summaries of engineering blog posts from ${company.name}. Stay updated with their latest technical insights and best practices.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      company.name,
+      "engineering blog",
+      "tech blog",
+      "AI summaries",
+      "software engineering",
+    ],
+    openGraph: {
+      type: "website",
+      url: `/company/${id}`,
+      title,
+      description,
+      siteName: "Enggist",
+      images: [
+        {
+          url: "/logo/android-chrome-512x512.png",
+          width: 512,
+          height: 512,
+          alt: `${company.name} on Enggist`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/logo/android-chrome-512x512.png"],
+    },
+    alternates: {
+      canonical: `/company/${id}`,
+    },
+  };
 }
 
 export default async function CompanyPage({ params, searchParams }: PageProps) {
@@ -43,7 +101,7 @@ export default async function CompanyPage({ params, searchParams }: PageProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      
+
       <main className="flex-1">
         <section className="border-b border-secondary bg-card">
           <div className="container mx-auto px-4 py-12 md:px-6">

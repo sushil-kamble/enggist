@@ -23,10 +23,35 @@ export default async function Home({ searchParams }: HomeProps) {
     redirect(`/?page=${totalPages}`);
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://enggist.com';
+
+  // JSON-LD structured data for WebSite with search action
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Enggist',
+    description: 'Engineering blog summaries powered by AI. Stay current with the latest from top engineering teams.',
+    url: baseUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${baseUrl}/?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Header />
-      
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="border-b border-secondary bg-card">
