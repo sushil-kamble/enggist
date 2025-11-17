@@ -79,18 +79,45 @@ export function SearchablePosts({
   };
 
   const renderPostsGrid = (posts: PostWithSummary[]) => (
-    <div className="grid grid-cols-1 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
     </div>
   );
 
+  const createPaginationRange = () => {
+    const pages: (number | "dots")[] = [];
+    const delta = 2;
+    const left = Math.max(2, displayPage - delta);
+    const right = Math.min(totalPages - 1, displayPage + delta);
+
+    pages.push(1);
+
+    if (left > 2) {
+      pages.push("dots");
+    }
+
+    for (let page = left; page <= right; page++) {
+      pages.push(page);
+    }
+
+    if (right < totalPages - 1) {
+      pages.push("dots");
+    }
+
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   const prevDisabled = displayPage === 1;
   const nextDisabled = displayPage === totalPages;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <form onSubmit={handleSearch} className="w-full">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
@@ -157,30 +184,48 @@ export function SearchablePosts({
 
           {totalCount > pageSize && (
             <div className="flex flex-col items-center justify-between gap-4 border-t border-secondary pt-6 text-sm text-muted-foreground md:flex-row">
-              <span>
+              <span className="text-xs md:text-sm">
                 Page {displayPage} of {totalPages}
               </span>
               <div className="flex items-center gap-2">
                 {prevDisabled ? (
-                  <span className="rounded-lg border border-muted px-4 py-2 text-muted">
+                  <span className="rounded-full border border-muted px-3 py-1.5 text-muted">
                     Previous
                   </span>
                 ) : (
                   <Link
                     href={`${basePath}?page=${Math.max(displayPage - 1, 1)}`}
-                    className="rounded-lg border border-input px-4 py-2 text-foreground transition-colors hover:bg-muted"
+                    className="rounded-full border border-input px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
                   >
                     Previous
                   </Link>
                 )}
+                {createPaginationRange().map((item, index) =>
+                  item === "dots" ? (
+                    <span key={`dots-${index}`} className="px-2">
+                      ...
+                    </span>
+                  ) : (
+                    <Link
+                      key={item}
+                      href={`${basePath}?page=${item}`}
+                      className={`rounded-full px-3 py-1.5 text-sm md:text-base ${item === displayPage
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-input text-foreground hover:bg-muted"
+                        }`}
+                    >
+                      {item}
+                    </Link>
+                  )
+                )}
                 {nextDisabled ? (
-                  <span className="rounded-lg border border-muted px-4 py-2 text-muted">
+                  <span className="rounded-full border border-muted px-3 py-1.5 text-muted">
                     Next
                   </span>
                 ) : (
                   <Link
                     href={`${basePath}?page=${Math.min(displayPage + 1, totalPages)}`}
-                    className="rounded-lg border border-input px-4 py-2 text-foreground transition-colors hover:bg-muted"
+                    className="rounded-full border border-input px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
                   >
                     Next
                   </Link>

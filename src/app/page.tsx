@@ -53,22 +53,8 @@ export default async function Home({ searchParams }: HomeProps) {
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="border-b border-secondary bg-card">
-          <div className="container mx-auto px-4 py-12 md:px-6">
-            <div className="mx-auto max-w-4xl text-center">
-              <h1 className="font-display text-4xl font-bold text-primary md:text-5xl">
-                Enggist
-              </h1>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Engineering blog summaries powered by AI. Stay current with the latest from top engineering teams.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* Latest Posts */}
-        <section className="container mx-auto px-4 py-12 md:px-6">
+        <section className="container mx-auto px-4 py-6 md:px-6">
           <SearchablePosts
             key={currentPage}
             initialPosts={posts}

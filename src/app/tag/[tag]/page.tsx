@@ -105,7 +105,7 @@ export default async function TagPage({ params, searchParams }: PageProps) {
 
       <main className="flex-1">
         <section className="border-b border-secondary bg-card">
-          <div className="container mx-auto px-4 py-12 md:px-6">
+          <div className="container mx-auto px-4 py-6 md:px-6">
             <div className="flex items-center gap-3">
               <Badge variant="default" className="text-lg px-4 py-1">
                 {tag}
@@ -117,7 +117,7 @@ export default async function TagPage({ params, searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 md:px-6">
+        <section className="container mx-auto px-4 py-6 md:px-6">
           <SearchablePosts
             key={`${tag}-${currentPage}`}
             initialPosts={posts}

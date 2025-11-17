@@ -128,7 +128,7 @@ export default async function PostDetailPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1">
-        <article className="container mx-auto px-4 py-12 md:px-6">
+        <article className="container mx-auto px-4 py-6 md:px-6">
           <header className="mb-8">
             <h1 className="text-3xl font-bold text-primary mb-4 leading-tight">
               {post.title}

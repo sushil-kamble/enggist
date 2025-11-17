@@ -104,7 +104,7 @@ export default async function CompanyPage({ params, searchParams }: PageProps) {
 
       <main className="flex-1">
         <section className="border-b border-secondary bg-card">
-          <div className="container mx-auto px-4 py-12 md:px-6">
+          <div className="container mx-auto px-4 py-6 md:px-6">
             <div>
               <h1 className="text-3xl font-bold text-primary">
                 {company.name}
@@ -121,11 +121,7 @@ export default async function CompanyPage({ params, searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 md:px-6">
-          <h2 className="text-2xl font-bold text-primary mb-8">
-            Blogs from {company.name}
-          </h2>
-
+        <section className="container mx-auto px-4 py-6 md:px-6">
           <SearchablePosts
             key={`${id}-${currentPage}`}
             initialPosts={posts}

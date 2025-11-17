@@ -11,10 +11,10 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const formattedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
     : null;
 
   return (
@@ -22,12 +22,12 @@ export function PostCard({ post }: PostCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle className="text-xl leading-tight mb-2">
+            <CardTitle className="mb-3 text-2xl leading-snug">
               <Link href={`/post/${post.id}`} className="hover:underline">
                 {post.title}
               </Link>
             </CardTitle>
-            <CardDescription className="flex items-center gap-4 text-sm">
+            <CardDescription className="flex items-center gap-4 text-base">
               <Link
                 href={`/company/${post.source.id}`}
                 className="font-medium hover:underline"
@@ -36,7 +36,7 @@ export function PostCard({ post }: PostCardProps) {
               </Link>
               {formattedDate && (
                 <span className="flex items-center gap-1">
-                  <FiCalendar className="h-3 w-3" />
+                  <FiCalendar className="h-4 w-4" />
                   {formattedDate}
                 </span>
               )}
@@ -48,8 +48,8 @@ export function PostCard({ post }: PostCardProps) {
       {post.summary && (
         <CardContent className="flex-1 space-y-4">
           {post.summary.whyItMatters && (
-            <div className="bg-muted p-3 rounded-md">
-              <p className="text-sm font-medium text-muted-foreground">
+            <div className="rounded-md bg-muted p-3">
+              <p className="text-base font-medium text-muted-foreground">
                 <span className="font-semibold text-foreground">Why it matters:</span>{' '}
                 {post.summary.whyItMatters}
               </p>
@@ -57,10 +57,10 @@ export function PostCard({ post }: PostCardProps) {
           )}
 
           {post.summary.bullets.length > 0 && (
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-base">
               {post.summary.bullets.map((bullet, idx) => (
                 <li key={idx} className="flex gap-2">
-                  <span className="text-primary font-bold">•</span>
+                  <span className="font-bold text-primary">•</span>
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -73,7 +73,10 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex flex-wrap gap-2">
           {post.summary?.tags.map((tag) => (
             <Link key={tag} href={`/tag/${tag}`}>
-              <Badge variant="secondary" className="hover:bg-accent cursor-pointer">
+              <Badge
+                variant="outline"
+                className="cursor-pointer px-3 py-1 text-sm hover:bg-accent hover:text-white"
+              >
                 {tag}
               </Badge>
             </Link>
@@ -83,10 +86,10 @@ export function PostCard({ post }: PostCardProps) {
           href={post.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+          className="inline-flex items-center gap-1 text-base font-medium text-primary hover:underline"
         >
           Read original
-          <FiExternalLink className="h-3 w-3" />
+          <FiExternalLink className="h-4 w-4" />
         </a>
       </CardFooter>
     </Card>

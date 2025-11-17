@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: [], count: 0 });
   }
 
+  const trimmedQuery = query.trim();
+
   try {
-    // Full-text search using search_tsv with ranking
-    const results = await db.execute<{
+    type SearchRow = {
       id: string;
       title: string;
       url: string;
@@ -26,7 +27,10 @@ export async function GET(request: NextRequest) {
       tags: string[] | null;
       keywords: string[] | null;
       rank: number;
-    }>(sql`
+    };
+
+    // Full-text search using search_tsv with ranking
+    const ftsResults = await db.execute<SearchRow>(sql`
       SELECT 
         p.id,
         p.title,
@@ -40,16 +44,46 @@ export async function GET(request: NextRequest) {
         su.why_it_matters,
         su.tags,
         su.keywords,
-        ts_rank(p.search_tsv, plainto_tsquery('english', ${query})) as rank
+        ts_rank(p.search_tsv, websearch_to_tsquery('english', ${trimmedQuery})) as rank
       FROM posts p
       JOIN sources s ON s.id = p.source_id
       LEFT JOIN summaries su ON su.post_id = p.id
-      WHERE p.search_tsv @@ plainto_tsquery('english', ${query})
+      WHERE p.search_tsv @@ websearch_to_tsquery('english', ${trimmedQuery})
       ORDER BY rank DESC, p.published_at DESC NULLS LAST
       LIMIT 50
     `);
 
-    const searchResults = Array.from(results).map((row) => ({
+    let rows = Array.from(ftsResults);
+
+    // Fallback: fuzzy search on title using pg_trgm if FTS finds nothing
+    if (rows.length === 0) {
+      const fuzzyResults = await db.execute<SearchRow>(sql`
+        SELECT 
+          p.id,
+          p.title,
+          p.url,
+          p.published_at,
+          p.excerpt,
+          s.name as source_name,
+          s.id as source_id,
+          s.site as source_site,
+          su.bullets_json,
+          su.why_it_matters,
+          su.tags,
+          su.keywords,
+          similarity(lower(p.title), lower(${trimmedQuery})) as rank
+        FROM posts p
+        JOIN sources s ON s.id = p.source_id
+        LEFT JOIN summaries su ON su.post_id = p.id
+        WHERE similarity(lower(p.title), lower(${trimmedQuery})) > 0.2
+        ORDER BY rank DESC, p.published_at DESC NULLS LAST
+        LIMIT 50
+      `);
+
+      rows = Array.from(fuzzyResults);
+    }
+
+    const searchResults = rows.map((row) => ({
       id: row.id,
       title: row.title,
       url: row.url,
@@ -62,11 +96,11 @@ export async function GET(request: NextRequest) {
       },
       summary: row.bullets_json
         ? {
-            bullets: row.bullets_json,
-            whyItMatters: row.why_it_matters,
-            tags: row.tags || [],
-            keywords: row.keywords || [],
-          }
+          bullets: row.bullets_json,
+          whyItMatters: row.why_it_matters,
+          tags: row.tags || [],
+          keywords: row.keywords || [],
+        }
         : null,
     }));
 
