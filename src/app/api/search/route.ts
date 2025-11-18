@@ -29,8 +29,15 @@ export async function GET(request: NextRequest) {
       rank: number;
     };
 
-    // Full-text search using search_tsv with ranking
-    const ftsResults = await db.execute<SearchRow>(sql`
+    // Combined Hybrid Search (FTS + Fuzzy)
+    // We prioritize FTS matches (weighted by column importance) but boost them with title similarity
+    // This allows "typo-tolerant" matches to still appear, while exact semantic matches rank highest
+    const searchResultsRows = await db.execute<SearchRow>(sql`
+      WITH search_query AS (
+        SELECT 
+          websearch_to_tsquery('english', ${trimmedQuery}) as query,
+          similarity(lower(${trimmedQuery}), lower(${trimmedQuery})) as input_sim -- Baseline
+      )
       SELECT 
         p.id,
         p.title,
@@ -44,44 +51,26 @@ export async function GET(request: NextRequest) {
         su.why_it_matters,
         su.tags,
         su.keywords,
-        ts_rank(p.search_tsv, websearch_to_tsquery('english', ${trimmedQuery})) as rank
+        -- Rank Calculation:
+        -- 1. FTS Rank (Cover Density) * 1.0
+        -- 2. Title Similarity * 0.5 (Boost for title matches even if fuzzy)
+        (
+          ts_rank_cd(p.search_tsv, (SELECT query FROM search_query)) + 
+          (similarity(lower(p.title), lower(${trimmedQuery})) * 0.5)
+        ) as rank
       FROM posts p
       JOIN sources s ON s.id = p.source_id
       LEFT JOIN summaries su ON su.post_id = p.id
-      WHERE p.search_tsv @@ websearch_to_tsquery('english', ${trimmedQuery})
+      CROSS JOIN search_query sq
+      WHERE 
+        -- Match if FTS matches OR Title is similar
+        (p.search_tsv @@ sq.query) OR 
+        (similarity(lower(p.title), lower(${trimmedQuery})) > 0.15)
       ORDER BY rank DESC, p.published_at DESC NULLS LAST
       LIMIT 50
     `);
 
-    let rows = Array.from(ftsResults);
-
-    // Fallback: fuzzy search on title using pg_trgm if FTS finds nothing
-    if (rows.length === 0) {
-      const fuzzyResults = await db.execute<SearchRow>(sql`
-        SELECT 
-          p.id,
-          p.title,
-          p.url,
-          p.published_at,
-          p.excerpt,
-          s.name as source_name,
-          s.id as source_id,
-          s.site as source_site,
-          su.bullets_json,
-          su.why_it_matters,
-          su.tags,
-          su.keywords,
-          similarity(lower(p.title), lower(${trimmedQuery})) as rank
-        FROM posts p
-        JOIN sources s ON s.id = p.source_id
-        LEFT JOIN summaries su ON su.post_id = p.id
-        WHERE similarity(lower(p.title), lower(${trimmedQuery})) > 0.2
-        ORDER BY rank DESC, p.published_at DESC NULLS LAST
-        LIMIT 50
-      `);
-
-      rows = Array.from(fuzzyResults);
-    }
+    const rows = Array.from(searchResultsRows);
 
     const searchResults = rows.map((row) => ({
       id: row.id,
