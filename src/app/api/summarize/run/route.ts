@@ -103,6 +103,11 @@ Provide:
       schema: SummarySchema as any,
       prompt: content,
       temperature: 0.3,
+      providerOptions: {
+        google: {
+          thinkingLevel: 'medium',
+        },
+      },
     });
 
     // Get the generated summary
