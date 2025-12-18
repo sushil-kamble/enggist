@@ -17,12 +17,15 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://enggist.com'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://enggist.com"
+  ),
   title: {
-    default: "Enggist – Engineering Blog Summaries Powered by AI",
-    template: "%s – Enggist",
+    default: "Enggist - Engineering Blog Summaries Powered by AI",
+    template: "%s - Enggist",
   },
-  description: "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs covering SRE, distributed systems, data engineering, ML, security, and more.",
+  description:
+    "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs covering SRE, distributed systems, data engineering, ML, security, and more.",
   keywords: [
     "engineering blogs",
     "tech blogs",
@@ -44,8 +47,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "Enggist",
-    title: "Enggist – Engineering Blog Summaries Powered by AI",
-    description: "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs.",
+    title: "Enggist - Engineering Blog Summaries Powered by AI",
+    description:
+      "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs.",
     images: [
       {
         url: "/logo/android-chrome-512x512.png",
@@ -57,17 +61,20 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Enggist – Engineering Blog Summaries Powered by AI",
-    description: "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs.",
+    title: "Enggist - Engineering Blog Summaries Powered by AI",
+    description:
+      "Stay current with the latest engineering insights from top tech companies. AI-powered summaries of engineering blogs.",
     images: ["/logo/android-chrome-512x512.png"],
     creator: "@enggist",
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-    ],
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
     apple: [
-      { url: "/logo/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/logo/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
   },
   robots: {

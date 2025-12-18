@@ -99,10 +99,18 @@ Provide:
 
     // Call Google Flash via Vercel AI SDK with structured output
     const result = await generateObject({
-      model: google('gemini-2.5-flash'),
+      model: google('gemini-3-flash-preview'),
       schema: SummarySchema as any,
       prompt: content,
       temperature: 0.3,
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: 'medium',
+            includeThoughts: true,
+          },
+        },
+      },
     });
 
     // Get the generated summary
@@ -129,7 +137,7 @@ Provide:
       whyItMatters,
       tags,
       keywords,
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
     });
 
     console.log(`[Summarize] ✓ ${post.title}`);
