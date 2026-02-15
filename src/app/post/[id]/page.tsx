@@ -1,6 +1,7 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { getPostById } from "@/lib/queries";
+import BackButton from "@/components/BackButton";
+import { getPostById, getRelatedPosts } from "@/lib/queries";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
@@ -77,11 +78,19 @@ export default async function PostDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const relatedPosts = await getRelatedPosts(
+    post.id,
+    post.source.id,
+    post.summary?.tags || [],
+    4
+  );
+
   const formattedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
     })
     : null;
 
@@ -128,6 +137,10 @@ export default async function PostDetailPage({ params }: PageProps) {
 
       <main className="flex-1">
         <article className="container mx-auto px-4 py-5 md:px-6 md:py-6">
+          <div className="mx-auto mb-2.5 max-w-5xl">
+            <BackButton />
+          </div>
+
           <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-secondary/75 bg-card/75 shadow-sm">
             <header className="space-y-2.5 px-5 py-5 md:px-6 md:py-6">
               <h1 className="text-2xl font-semibold leading-tight text-primary md:text-3xl">
@@ -270,6 +283,71 @@ export default async function PostDetailPage({ params }: PageProps) {
                   </Button>
                 </div>
               )}
+
+              <section className="space-y-3 pt-1">
+                <h2 className="text-base font-semibold text-primary md:text-lg">
+                  Related posts
+                </h2>
+
+                {relatedPosts.length > 0 ? (
+                  <div className="grid gap-2.5 md:grid-cols-2">
+                    {relatedPosts.map((relatedPost) => {
+                      const relatedDate = relatedPost.publishedAt
+                        ? new Date(relatedPost.publishedAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          timeZone: "UTC",
+                        })
+                        : null;
+
+                      const relatedSnippet =
+                        relatedPost.summary?.whyItMatters || relatedPost.excerpt;
+
+                      return (
+                        <Link
+                          key={relatedPost.id}
+                          href={`/post/${relatedPost.id}`}
+                          scroll
+                          className="group rounded-lg border border-secondary/65 bg-background/55 px-3.5 py-3 transition-all duration-200 hover:border-primary/35 hover:bg-muted/55"
+                        >
+                          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                            <span>{relatedPost.source.name}</span>
+                            {relatedDate && <span>{relatedDate}</span>}
+                          </div>
+
+                          <h3 className="mt-1 text-sm font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
+                            {relatedPost.title}
+                          </h3>
+
+                          {relatedSnippet && (
+                            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                              {relatedSnippet}
+                            </p>
+                          )}
+
+                          {relatedPost.summary?.tags && relatedPost.summary.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {relatedPost.summary.tags.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary/90"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No related posts available yet.
+                  </p>
+                )}
+              </section>
             </div>
           </div>
         </article>

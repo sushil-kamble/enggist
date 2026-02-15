@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bungee, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { TopLoaderProvider } from "@/components/TopLoaderProvider";
+import ScrollToTopOnPathChange from "@/components/ScrollToTopOnPathChange";
 
 const bungee = Bungee({
   weight: "400",
@@ -101,6 +102,7 @@ export default function RootLayout({
         className={`${workSans.variable} ${bungee.variable} antialiased font-sans`}
       >
         <TopLoaderProvider />
+        <ScrollToTopOnPathChange />
         {children}
       </body>
     </html>

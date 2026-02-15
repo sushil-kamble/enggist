@@ -1,11 +1,8 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { SearchablePosts } from "@/components/SearchablePosts";
-import { db } from "@/db";
-import { posts as postsTable } from "@/db/schema";
-import { getPaginatedPosts } from "@/lib/queries";
+import { getLastIndexedAt, getPaginatedPosts } from "@/lib/queries";
 import { parsePostSort } from "@/lib/post-sort";
-import { sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 interface HomeProps {
@@ -21,14 +18,11 @@ export default async function Home({ searchParams }: HomeProps) {
   const parsedPage = pageValue ? parseInt(pageValue, 10) : 1;
   const currentPage = Number.isNaN(parsedPage) ? 1 : Math.max(parsedPage, 1);
 
-  const [{ posts, totalCount }, lastIndexedResult] = await Promise.all([
+  const [{ posts, totalCount }, lastIndexedAt] = await Promise.all([
     getPaginatedPosts(currentPage, pageSize, sortBy),
-    db.execute<{ lastIndexedAt: Date | string | null }>(
-      sql`SELECT MAX(${postsTable.createdAt}) AS "lastIndexedAt" FROM ${postsTable}`
-    ),
+    getLastIndexedAt(),
   ]);
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const lastIndexedAt = lastIndexedResult[0]?.lastIndexedAt;
   const lastIndexedLabel = lastIndexedAt
     ? new Intl.DateTimeFormat("en-US", {
       month: "short",

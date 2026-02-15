@@ -14,6 +14,7 @@ export function PostCard({ post }: PostCardProps) {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'UTC',
     })
     : null;
 
@@ -38,7 +39,11 @@ export function PostCard({ post }: PostCardProps) {
           </CardDescription>
 
           <CardTitle className="text-2xl leading-snug">
-            <Link href={`/post/${post.id}`} className="transition-colors hover:text-accent">
+            <Link
+              href={`/post/${post.id}`}
+              scroll
+              className="transition-colors hover:text-accent"
+            >
               {post.title}
             </Link>
           </CardTitle>

@@ -79,9 +79,14 @@ export function SearchablePosts({
     setError(null);
     setHasSearched(true);
     setSearchQuery(trimmedQuery);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(trimmedQuery)}`);
+      const response = await fetch(`/api/search?q=${encodeURIComponent(trimmedQuery)}`, {
+        signal: controller.signal,
+        cache: "no-store",
+      });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data?.message || "Search failed");
@@ -96,10 +101,16 @@ export function SearchablePosts({
       if (requestId !== latestSearchRequestRef.current) {
         return;
       }
-      const message = err instanceof Error ? err.message : "Search failed";
+      const message =
+        err instanceof Error && err.name === "AbortError"
+          ? "Search timed out. Please try again."
+          : err instanceof Error
+            ? err.message
+            : "Search failed";
       setError(message);
       setSearchResults([]);
     } finally {
+      clearTimeout(timeoutId);
       if (requestId === latestSearchRequestRef.current) {
         setLoading(false);
       }

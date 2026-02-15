@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
 
   const trimmedQuery = query.trim();
 
+  // Ignore very short terms to avoid expensive broad scans.
+  if (trimmedQuery.length < 2) {
+    return NextResponse.json({ results: [], count: 0 });
+  }
+
   try {
     type SearchRow = {
       id: string;
@@ -29,14 +34,10 @@ export async function GET(request: NextRequest) {
       rank: number;
     };
 
-    // Combined Hybrid Search (FTS + Fuzzy)
-    // We prioritize FTS matches (weighted by column importance) but boost them with title similarity
-    // This allows "typo-tolerant" matches to still appear, while exact semantic matches rank highest
+    // Hybrid Search (FTS + trigram index friendly fuzzy match)
     const searchResultsRows = await db.execute<SearchRow>(sql`
       WITH search_query AS (
-        SELECT 
-          websearch_to_tsquery('english', ${trimmedQuery}) as query,
-          similarity(lower(${trimmedQuery}), lower(${trimmedQuery})) as input_sim -- Baseline
+        SELECT websearch_to_tsquery('english', ${trimmedQuery}) as query
       )
       SELECT 
         p.id,
@@ -51,21 +52,17 @@ export async function GET(request: NextRequest) {
         su.why_it_matters,
         su.tags,
         su.keywords,
-        -- Rank Calculation:
-        -- 1. FTS Rank (Cover Density) * 1.0
-        -- 2. Title Similarity * 0.5 (Boost for title matches even if fuzzy)
         (
           ts_rank_cd(p.search_tsv, (SELECT query FROM search_query)) + 
-          (similarity(lower(p.title), lower(${trimmedQuery})) * 0.5)
+          (similarity(p.title, ${trimmedQuery}) * 0.5)
         ) as rank
       FROM posts p
       JOIN sources s ON s.id = p.source_id
       LEFT JOIN summaries su ON su.post_id = p.id
       CROSS JOIN search_query sq
       WHERE 
-        -- Match if FTS matches OR Title is similar
         (p.search_tsv @@ sq.query) OR 
-        (similarity(lower(p.title), lower(${trimmedQuery})) > 0.15)
+        (p.title % ${trimmedQuery})
       ORDER BY rank DESC, p.published_at DESC NULLS LAST
       LIMIT 50
     `);
@@ -97,10 +94,11 @@ export async function GET(request: NextRequest) {
       results: searchResults,
       count: searchResults.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[Search] Error:', error);
     return NextResponse.json(
-      { error: 'Search failed', message: error.message },
+      { error: 'Search failed', message },
       { status: 500 }
     );
   }
