@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FiChevronLeft, FiChevronRight, FiSearch, FiSliders } from "react-icons/fi";
@@ -46,6 +46,8 @@ export function SearchablePosts({
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isRoutePending, startRouteTransition] = useTransition();
+  const latestSearchRequestRef = useRef(0);
+  const isClearingQueryRef = useRef(false);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const displayPage = Math.min(currentPage, totalPages);
@@ -61,7 +63,18 @@ export function SearchablePosts({
   const skeletonCount = Math.min(6, Math.max(2, pageSize));
   const showRouteSkeleton = !showingSearchResults && isRoutePending;
 
+  const resetSearchState = useCallback(() => {
+    // Invalidate in-flight requests so stale responses cannot repopulate results.
+    latestSearchRequestRef.current += 1;
+    setSearchResults([]);
+    setSearchQuery("");
+    setHasSearched(false);
+    setError(null);
+    setLoading(false);
+  }, []);
+
   const runSearch = useCallback(async (trimmedQuery: string) => {
+    const requestId = ++latestSearchRequestRef.current;
     setLoading(true);
     setError(null);
     setHasSearched(true);
@@ -75,26 +88,36 @@ export function SearchablePosts({
       }
 
       const data = await response.json();
+      if (requestId !== latestSearchRequestRef.current) {
+        return;
+      }
       setSearchResults(data.results || []);
     } catch (err) {
+      if (requestId !== latestSearchRequestRef.current) {
+        return;
+      }
       const message = err instanceof Error ? err.message : "Search failed";
       setError(message);
       setSearchResults([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestSearchRequestRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     const urlQuery = (searchParams.get("q") || "").trim();
+
+    if (isClearingQueryRef.current && urlQuery) {
+      return;
+    }
+
     setQuery(urlQuery);
 
     if (!urlQuery) {
-      setSearchResults([]);
-      setSearchQuery("");
-      setHasSearched(false);
-      setError(null);
-      setLoading(false);
+      isClearingQueryRef.current = false;
+      resetSearchState();
       return;
     }
 
@@ -103,7 +126,7 @@ export function SearchablePosts({
     }
 
     void runSearch(urlQuery);
-  }, [hasSearched, runSearch, searchParams, searchQuery]);
+  }, [hasSearched, resetSearchState, runSearch, searchParams, searchQuery]);
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -146,18 +169,29 @@ export function SearchablePosts({
     });
   };
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
+    const hadQueryParam = params.has("q");
     params.delete("q");
     params.set("page", "1");
-    router.push(`${pathname}?${params.toString()}`);
 
     setQuery("");
-    setSearchResults([]);
-    setSearchQuery("");
-    setHasSearched(false);
-    setError(null);
-    setLoading(false);
+    resetSearchState();
+
+    if (hadQueryParam) {
+      isClearingQueryRef.current = true;
+      router.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [pathname, resetSearchState, router, searchParams]);
+
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextQuery = event.target.value;
+    setQuery(nextQuery);
+
+    // Supports both manual deletion and native clear icon in search inputs.
+    if (nextQuery.trim().length === 0 && searchParams.has("q")) {
+      handleClear();
+    }
   };
 
   const createPageHref = (page: number) => {
@@ -226,7 +260,7 @@ export function SearchablePosts({
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={handleQueryChange}
               placeholder={searchPlaceholder}
               className="w-full rounded-xl bg-transparent py-3 pl-10 pr-3 text-[15px] text-foreground placeholder:text-muted-foreground/80 focus:outline-none"
             />
