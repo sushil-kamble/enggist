@@ -12,17 +12,10 @@ These rules ensure consistency, safety, and quality across all automated code ch
 ## ⚙️ Development Commands
 
 ```bash
-# Start development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Serve production build locally
-pnpm start
-
-# Lint code
-pnpm lint
+pnpm dev # Start development server
+pnpm build # Build for production
+pnpm start # Serve production build locally
+pnpm lint # Lint code
 
 🧩 Repository Structure (Typical)
 src/               # Main source code
@@ -52,3 +45,4 @@ Tailwind CSS has global.css. approach. Please refer the sample global.css (Note 
 - **Sequential Thinking**: Use to break down and reason through complex tasks step by step.
 - **shadcn**: Use for working with shadcn components—including fetching up-to-date component info, availability, and examples; reach for this MCP whenever the task even brushes against shadcn UI so we avoid guessing.
 - **Context7**: Use to retrieve the latest documentation for technologies such as Next.js, Tailwind CSS, Motion.dev, and any future libraries adopted in this project.
+```

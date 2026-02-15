@@ -127,5 +127,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--muted) 45%, transparent) 0%, transparent 45%),
+      radial-gradient(circle at 100% 15%, color-mix(in srgb, var(--secondary) 35%, transparent) 0%, transparent 42%),
+      linear-gradient(180deg, color-mix(in srgb, var(--background) 95%, white) 0%, var(--background) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    color: var(--foreground);
   }
 }

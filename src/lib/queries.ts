@@ -1,6 +1,7 @@
 import { db } from '@/db';
 import { posts, sources, summaries } from '@/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql, type SQL } from 'drizzle-orm';
+import { DEFAULT_POST_SORT, type PostSortOption } from '@/lib/post-sort';
 
 export interface PostWithSummary {
   id: string;
@@ -22,10 +23,29 @@ export interface PostWithSummary {
   } | null;
 }
 
+function getPostOrderBy(sortBy: PostSortOption): SQL[] {
+  const publishedOrCreated = sql`COALESCE(${posts.publishedAt}, ${posts.createdAt})`;
+
+  switch (sortBy) {
+    case 'oldest':
+      return [asc(publishedOrCreated), asc(posts.createdAt)];
+    case 'title_asc':
+      return [asc(sql`LOWER(${posts.title})`), desc(publishedOrCreated)];
+    case 'source_asc':
+      return [asc(sql`LOWER(${sources.name})`), desc(publishedOrCreated)];
+    case 'newest':
+    default:
+      return [desc(publishedOrCreated), desc(posts.createdAt)];
+  }
+}
+
 /**
  * Fetch latest posts with summaries
  */
-export async function getLatestPosts(limit = 30): Promise<PostWithSummary[]> {
+export async function getLatestPosts(
+  limit = 30,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
+): Promise<PostWithSummary[]> {
   const result = await db
     .select({
       id: posts.id,
@@ -45,7 +65,7 @@ export async function getLatestPosts(limit = 30): Promise<PostWithSummary[]> {
     .from(posts)
     .innerJoin(sources, eq(posts.sourceId, sources.id))
     .leftJoin(summaries, eq(summaries.postId, posts.id))
-    .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+    .orderBy(...getPostOrderBy(sortBy))
     .limit(limit);
 
   return result.map((row) => ({
@@ -71,7 +91,11 @@ export async function getLatestPosts(limit = 30): Promise<PostWithSummary[]> {
   }));
 }
 
-export async function getPaginatedPosts(page = 1, limit = 30): Promise<{
+export async function getPaginatedPosts(
+  page = 1,
+  limit = 30,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
+): Promise<{
   posts: PostWithSummary[];
   totalCount: number;
 }> {
@@ -99,7 +123,7 @@ export async function getPaginatedPosts(page = 1, limit = 30): Promise<{
       .from(posts)
       .innerJoin(sources, eq(posts.sourceId, sources.id))
       .leftJoin(summaries, eq(summaries.postId, posts.id))
-      .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+      .orderBy(...getPostOrderBy(sortBy))
       .limit(pageSize)
       .offset(offset),
     db.execute<{ count: string }>(sql`SELECT COUNT(*)::int AS count FROM posts`),
@@ -135,7 +159,8 @@ export async function getPaginatedPosts(page = 1, limit = 30): Promise<{
 export async function getPaginatedPostsBySource(
   sourceId: string,
   page = 1,
-  limit = 10
+  limit = 10,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
 ): Promise<{ posts: PostWithSummary[]; totalCount: number }> {
   const pageNumber = Math.max(page, 1);
   const pageSize = Math.max(limit, 1);
@@ -162,7 +187,7 @@ export async function getPaginatedPostsBySource(
       .innerJoin(sources, eq(posts.sourceId, sources.id))
       .leftJoin(summaries, eq(summaries.postId, posts.id))
       .where(eq(posts.sourceId, sourceId))
-      .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+      .orderBy(...getPostOrderBy(sortBy))
       .limit(pageSize)
       .offset(offset),
     db.execute<{ count: string }>(
@@ -200,7 +225,8 @@ export async function getPaginatedPostsBySource(
 export async function getPaginatedPostsByTag(
   tag: string,
   page = 1,
-  limit = 10
+  limit = 10,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
 ): Promise<{ posts: PostWithSummary[]; totalCount: number }> {
   const pageNumber = Math.max(page, 1);
   const pageSize = Math.max(limit, 1);
@@ -227,7 +253,7 @@ export async function getPaginatedPostsByTag(
       .innerJoin(sources, eq(posts.sourceId, sources.id))
       .innerJoin(summaries, eq(summaries.postId, posts.id))
       .where(sql`${tag} = ANY(${summaries.tags})`)
-      .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+      .orderBy(...getPostOrderBy(sortBy))
       .limit(pageSize)
       .offset(offset),
     db.execute<{ count: string }>(sql`
@@ -266,7 +292,11 @@ export async function getPaginatedPostsByTag(
 /**
  * Fetch posts by tag
  */
-export async function getPostsByTag(tag: string, limit = 50): Promise<PostWithSummary[]> {
+export async function getPostsByTag(
+  tag: string,
+  limit = 50,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
+): Promise<PostWithSummary[]> {
   const result = await db
     .select({
       id: posts.id,
@@ -287,7 +317,7 @@ export async function getPostsByTag(tag: string, limit = 50): Promise<PostWithSu
     .innerJoin(sources, eq(posts.sourceId, sources.id))
     .innerJoin(summaries, eq(summaries.postId, posts.id))
     .where(sql`${tag} = ANY(${summaries.tags})`)
-    .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+    .orderBy(...getPostOrderBy(sortBy))
     .limit(limit);
 
   return result.map((row) => ({
@@ -314,7 +344,11 @@ export async function getPostsByTag(tag: string, limit = 50): Promise<PostWithSu
 /**
  * Fetch posts by source
  */
-export async function getPostsBySource(sourceId: string, limit = 50): Promise<PostWithSummary[]> {
+export async function getPostsBySource(
+  sourceId: string,
+  limit = 50,
+  sortBy: PostSortOption = DEFAULT_POST_SORT
+): Promise<PostWithSummary[]> {
   const result = await db
     .select({
       id: posts.id,
@@ -335,7 +369,7 @@ export async function getPostsBySource(sourceId: string, limit = 50): Promise<Po
     .innerJoin(sources, eq(posts.sourceId, sources.id))
     .leftJoin(summaries, eq(summaries.postId, posts.id))
     .where(eq(posts.sourceId, sourceId))
-    .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+    .orderBy(...getPostOrderBy(sortBy))
     .limit(limit);
 
   return result.map((row) => ({

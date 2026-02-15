@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import { getPostById } from "@/lib/queries";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { FiExternalLink, FiCalendar } from "react-icons/fi";
@@ -128,171 +127,151 @@ export default async function PostDetailPage({ params }: PageProps) {
       <Header />
 
       <main className="flex-1">
-        <article className="container mx-auto px-4 py-6 md:px-6">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-primary mb-4 leading-tight">
-              {post.title}
-            </h1>
+        <article className="container mx-auto px-4 py-5 md:px-6 md:py-6">
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-secondary/75 bg-card/75 shadow-sm">
+            <header className="space-y-2.5 px-5 py-5 md:px-6 md:py-6">
+              <h1 className="text-2xl font-semibold leading-tight text-primary md:text-3xl">
+                {post.title}
+              </h1>
 
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-              <Link
-                href={`/company/${post.source.id}`}
-                className="font-medium hover:underline"
-              >
-                {post.source.name}
-              </Link>
-              {formattedDate && (
-                <span className="flex items-center gap-1">
-                  <FiCalendar className="h-4 w-4" />
-                  {formattedDate}
-                </span>
-              )}
-            </div>
-
-            {post.summary?.tags && post.summary.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post.summary.tags.map((tag) => (
-                  <Link key={tag} href={`/tag/${tag}`}>
-                    <Badge variant="secondary" className="hover:bg-accent cursor-pointer">
-                      {tag}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </header>
-
-          <Separator className="my-8" />
-
-          {post.summary ? (
-            <div className="space-y-8">
-              {post.summary.whyItMatters && (
-                <section>
-                  <h2 className="text-xl font-semibold text-primary mb-3">
-                    Why It Matters
-                  </h2>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="text-foreground leading-relaxed">
-                      {post.summary.whyItMatters}
-                    </p>
-                  </div>
-                </section>
-              )}
-
-              {post.summary.bullets.length > 0 && (
-                <section>
-                  <h2 className="text-xl font-semibold text-primary mb-3">
-                    Key Takeaways
-                  </h2>
-                  <ul className="space-y-3">
-                    {post.summary.bullets.map((bullet, idx) => (
-                      <li key={idx} className="flex gap-3">
-                        <span className="text-primary font-bold text-lg flex-shrink-0">
-                          •
-                        </span>
-                        <span className="text-foreground leading-relaxed">
-                          {bullet}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-
-              {post.summary.keywords && post.summary.keywords.length > 0 && (
-                <section>
-                  <h2 className="text-xl font-semibold text-primary mb-3">
-                    Keywords
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {post.summary.keywords.map((keyword) => (
-                      <Badge key={keyword} variant="outline">
-                        {keyword}
-                      </Badge>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">
-                Summary not available yet. The post is being processed.
-              </p>
-            </div>
-          )}
-
-          {post.content && (
-            <>
-              <Separator className="my-8" />
-
-              <section className="relative">
-                <h2 className="text-xl font-semibold text-primary mb-4">
-                  Content Preview
-                </h2>
-                <div className="relative">
-                  {/* Content container with max height and overflow hidden */}
-                  <div className="max-h-[500px] overflow-hidden">
-                    <div className="prose prose-slate dark:prose-invert max-w-none">
-                      <div
-                        className="text-foreground leading-relaxed [&>p]:mb-4 [&>h1]:mb-4 [&>h2]:mb-3 [&>h3]:mb-2 [&>ul]:mb-4 [&>ol]:mb-4 [&>pre]:mb-4"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Elongated gradient overlay with brand colors */}
-                  <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-background via-background/98 to-transparent pointer-events-none z-0" />
-                  <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-accent/30 via-accent/15 to-transparent pointer-events-none z-0" />
-                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-primary/20 via-primary/10 to-transparent pointer-events-none z-0" />
-
-                  {/* Call to action floating inside gradient */}
-                  <div className="absolute inset-x-0 bottom-8 flex justify-center z-10">
-                    <div className="pointer-events-auto rounded-2xl border border-primary/10 bg-background/95 px-8 py-6 text-center shadow-xl backdrop-blur">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Continue reading on the original blog to support the author
-                      </p>
-                      <Button
-                        asChild
-                        size="lg"
-                        className="relative overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
-                      >
-                        <a
-                          href={post.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                          <span className="relative">Read Full Article</span>
-                          <FiExternalLink className="h-5 w-5 relative" />
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </>
-          )}
-
-          {!post.content && (
-            <div className="flex justify-center mt-8">
-              <Button
-                asChild
-                size="lg"
-                className="relative overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <a
-                  href={post.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+                <Link
+                  href={`/company/${post.source.id}`}
+                  className="font-medium transition-colors hover:text-foreground hover:underline"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                  <span className="relative">Read Full Article</span>
-                  <FiExternalLink className="h-5 w-5 relative" />
-                </a>
-              </Button>
+                  {post.source.name}
+                </Link>
+                {formattedDate && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <FiCalendar className="h-4 w-4" />
+                    {formattedDate}
+                  </span>
+                )}
+              </div>
+
+              {post.summary?.tags && post.summary.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {post.summary.tags.map((tag) => (
+                    <Link key={tag} href={`/tag/${tag}`}>
+                      <Badge
+                        variant="outline"
+                        className="border-primary/25 bg-primary/10 text-primary/90 transition-colors hover:bg-primary/15 hover:text-primary"
+                      >
+                        #{tag}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </header>
+
+            <div className="space-y-6 border-t border-secondary/60 px-5 py-5 md:px-6 md:py-6">
+              {post.summary ? (
+                <>
+                  {post.summary.whyItMatters && (
+                    <section className="space-y-2">
+                      <h2 className="text-base font-semibold text-primary md:text-lg">
+                        Why it matters
+                      </h2>
+                      <p className="rounded-lg bg-muted/60 px-4 py-3 text-sm leading-relaxed text-foreground md:text-base">
+                        {post.summary.whyItMatters}
+                      </p>
+                    </section>
+                  )}
+
+                  {post.summary.bullets.length > 0 && (
+                    <section className="space-y-2.5">
+                      <h2 className="text-base font-semibold text-primary md:text-lg">
+                        Key takeaways
+                      </h2>
+                      <ul className="space-y-2.5 text-sm text-foreground md:text-base">
+                        {post.summary.bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex gap-2.5">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                            <span className="leading-relaxed">{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {post.summary.keywords && post.summary.keywords.length > 0 && (
+                    <section className="space-y-2">
+                      <h2 className="text-base font-semibold text-primary md:text-lg">
+                        Keywords
+                      </h2>
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.summary.keywords.map((keyword) => (
+                          <Badge
+                            key={keyword}
+                            variant="outline"
+                            className="border-secondary/80 bg-background/65 text-muted-foreground"
+                          >
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Summary is not available yet. This post is still being processed.
+                </p>
+              )}
+
+              {post.content ? (
+                <section className="space-y-3">
+                  <h2 className="text-base font-semibold text-primary md:text-lg">
+                    Content preview
+                  </h2>
+                  <div className="relative overflow-hidden rounded-lg border border-secondary/65 bg-background/55">
+                    <div className="max-h-[520px] overflow-hidden px-4 pb-28 pt-4 md:px-5">
+                      <div className="prose prose-slate dark:prose-invert max-w-none">
+                        <div
+                          className="text-sm leading-relaxed text-foreground md:text-base [&>h1]:mb-3 [&>h2]:mb-2.5 [&>h3]:mb-2 [&>ol]:mb-3 [&>p]:mb-3 [&>pre]:mb-3 [&>ul]:mb-3"
+                          dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-background via-background/92 to-transparent" />
+
+                    <div className="absolute inset-x-0 bottom-4 flex justify-center px-4">
+                      <div className="pointer-events-auto w-full max-w-md rounded-xl border border-secondary/70 bg-background/92 px-4 py-3 text-center shadow-lg backdrop-blur">
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          Continue reading on the original blog to support the author
+                        </p>
+                        <Button asChild className="h-9 px-4 text-sm">
+                          <a
+                            href={post.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Read full article
+                            <FiExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                <div className="pt-1">
+                  <Button asChild className="h-9 px-4 text-sm">
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Read full article
+                      <FiExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </article>
       </main>
 
