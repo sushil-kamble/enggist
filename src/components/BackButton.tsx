@@ -28,7 +28,7 @@ export default function BackButton({
         }
         router.push(fallbackHref);
       }}
-      className="h-8 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+      className="h-8 cursor-pointer rounded-full bg-transparent px-3 text-sm text-muted-foreground transition-opacity hover:bg-transparent hover:text-foreground/90 hover:opacity-80 active:bg-transparent"
     >
       <FiArrowLeft className="h-4 w-4" />
       {label}

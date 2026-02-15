@@ -108,10 +108,7 @@ export default async function CompanyPage({ params, searchParams }: PageProps) {
         <section className="border-b border-secondary/70 bg-card/45">
           <div className="container mx-auto px-4 py-4 md:px-6 md:py-5">
             <div className="rounded-xl border border-secondary/75 bg-background/75 p-4 shadow-sm">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Company feed
-              </p>
-              <div className="mt-2">
+              <div>
                 <h1 className="text-2xl font-semibold leading-tight text-primary md:text-3xl">
                 {company.name}
                 </h1>
